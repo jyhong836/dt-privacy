@@ -1,7 +1,7 @@
 import json
 import os
 
-from dt.chat import Chat
+from dt.chat import Chat, OpenAIChat
 from tempfile import TemporaryDirectory
 from dt.perspectives.privacy.sys_prompts import PROMPT_TEMPLATE, PII_INFO, PII_PROMPT_TYPE, PRIVACY_TOPIC
 
@@ -80,9 +80,10 @@ def main(args):
             comple_tokens = 0
             num_prompt = 0
             with TemporaryDirectory(dir="./.cache") as dirname:
-                model = Chat.from_helm(args, conv_template="llama-2",  # FIXME ad-hoc args.conv_template, 
-                                       cache=dirname,
-                                        api_key=args.key)
+                # model = Chat.from_helm(args, conv_template="llama-2",  # FIXME ad-hoc args.conv_template, 
+                #                        cache=dirname,
+                #                         api_key=args.key)
+                model = OpenAIChat(args.model, dirname, api_key=args.key)
 
                 for batch_idx in range(num_batches):
                     batch_start = batch_idx * args.batch_size
@@ -117,8 +118,9 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', default=1, type=int)
-    parser.add_argument('--key', default=None)
-    parser.add_argument('--model', default='hf')
+    parser.add_argument('--dry_run', action='store_true')
+    parser.add_argument('--key', default=None, help='Required openai API key')
+    parser.add_argument('--model', default="openai/gpt-3.5-turbo-0301")
     parser.add_argument('--dataset_size', default=10, type=int)
     parser.add_argument('--batch_size', default=4, type=int)
     parser.add_argument('--template', default=1, type=int)
